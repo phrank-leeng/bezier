@@ -12,7 +12,7 @@ canvas.pack()
 start = []
 
 # generate t values
-ts = [t / 50 for t in range(101)]
+ts = [t / 100 for t in range(101)]
 
 lines = []
 
@@ -23,24 +23,16 @@ def calc_point(p1, p2, p3, p4, t):
     np2 = np.array(p2)
     np3 = np.array(p3)
     np4 = np.array(p4)
-    # t is equivalent to the distance traveled on the Bézier curve from control point P1 to P4
-    if t < 0.01:
-        # if t is smaller than this threshold we can just return P1 as changes are likely not noticeable for the
-        # given screen resolutions
-        return p1
-    else:
-        # calculate mid points
-        p12 = (np1 + np2) / 2
-        p23 = (np2 + np3) / 2
-        p34 = (np3 + np4) / 2
 
-        p123 = (p12 + p23) / 2
-        p234 = (p23 + p34) / 2
+    p12 = (1 - t) * np1 + t * np2
+    p23 = (1 - t) * np2 + t * np3
+    p34 = (1 - t) * np3 + t * np4
 
-        q = (p123 + p234) / 2
+    p123 = (1 - t) * p12 + t * p23
+    p234 = (1 - t) * p23 + t * p34
 
-        # calculate point on the Bézier curve according to the formula in the lecture and transform back to python array
-        return ((1 - t) ** 3 * np1 + 3 * t * (1 - t) ** 2 * p12 + 3 * t ** 2 * (1 - t) * p123 + t ** 3 * q).tolist()
+    q = (1 - t) * p123 + t * p234
+    return q.tolist()
 
 
 # calculates and returns an array with points on the Bézier curve
