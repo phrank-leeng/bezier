@@ -20,18 +20,22 @@ lines = []
 
 
 # calculates midpoints on the Bézier curve recursively for any parameter t and returns the final midpoint q
-def calc_point(p, t):
-    if len(p) == 1:
-        return p[0]
+def calc_point(p1, p2, p3, p4, t):
+    # transform vectors to numpy arrays for easier scalar operations
+    np1 = np.array(p1)
+    np2 = np.array(p2)
+    np3 = np.array(p3)
+    np4 = np.array(p4)
 
-    new_points = []
+    p12 = (1 - t) * np1 + t * np2
+    p23 = (1 - t) * np2 + t * np3
+    p34 = (1 - t) * np3 + t * np4
 
-    # transform vectors to numpy arrays for easier scalar operation
-    npp = np.array(p)
-    for i in range(0, len(npp) - 1):
-        new_points.append(((1 - t) * npp[i] + t * npp[i + 1]).tolist())
+    p123 = (1 - t) * p12 + t * p23
+    p234 = (1 - t) * p23 + t * p34
 
-    return calc_point(new_points, t)
+    q = (1 - t) * p123 + t * p234
+    return q.tolist()
 
 
 # calculates and returns an array with points on the Bézier curve
@@ -41,7 +45,7 @@ def bezier(p1, p2, p3, p4, ts):
     # iterate through t values and calculate the point on the curve
     for t in ts:
         # add the calculated points to the empty array
-        points.append(calc_point([p1, p2, p3, p4], t))
+        points.append(calc_point(p1, p2, p3, p4, t))
     return points
 
 
@@ -60,7 +64,7 @@ def get_center(p):
     return [(p[2] + p[0]) / 2, (p[3] + p[1]) / 2]
 
 
-# store multimediasystems points in the global points array
+# store bezier points in the global points array
 def store_bezier_in_array():
     p1, p2, p3, p4 = get_p_from_rect()
     global points
