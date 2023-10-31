@@ -36,19 +36,28 @@ canvas = tk.Canvas(left_f, width=550, height=700, bg='gray55')
 canvas.place(x=0, y=0)
 canvas.pack()
 
+dendrites = []
+
 
 def dec_lvl():
     global level
     if level > 1:
         level -= 1
-    lvlStr.set(level)
+        refresh()
 
 
 def inc_lvl():
     global level
     if level < 8:
         level += 1
+        refresh()
+
+
+def refresh():
     lvlStr.set(level)
+    for d in dendrites:
+        canvas.delete(d)
+    RC_C()
 
 level_label = Label(right_f, textvariable=lvlStr)
 lvlStr.set(level)
@@ -69,7 +78,7 @@ def num_dendrites():
     return fibonacci(level + 2)
 
 
-def draw_dendrite():
+def draw_dendrite(points):
     color = "#%02x%02x%02x" % (135, 188, 240)
 
 
@@ -87,6 +96,15 @@ def calc_points_on_circle():
         p = [r * math.sin(theta), r * math.cos(theta)]
         points.append(p)
     return points
+
+
+def RC_C():
+    points = calc_points_on_circle()
+    RC_A()
+
+
+def RC_A():
+
 
 
 # main method
