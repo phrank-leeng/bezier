@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import *
 
@@ -25,6 +26,9 @@ right_f = Frame(root, width=250, height=700)
 right_f.pack(side='right')
 
 level = 1
+
+# midpoint of circle frame
+m_circle = [250, 200]
 
 # empty canvas
 canvas = tk.Canvas(left_f, width=550, height=700, bg='gray55')
@@ -61,6 +65,22 @@ def num_dendrites():
 
 def draw_dendrite():
     color = "#%02x%02x%02x" % (135, 188, 240)
+
+
+def calc_points_on_circle():
+    points = []
+    # starting point 90-degree on circle
+    start = [250, 400]
+    points.append(start)
+    num_d = num_dendrites()
+    # angle between dendrites
+    angle = 360 / num_d
+    r = 150
+    for i in range(1, num_d):
+        theta = 90 + angle * i
+        p = [r * math.sin(theta), r * math.cos(theta)]
+        points.append(p)
+    return points
 
 
 # main method
