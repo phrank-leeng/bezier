@@ -26,6 +26,7 @@ right_f = Frame(root, width=250, height=700)
 right_f.pack(side='right')
 
 level = 1
+lvlStr = StringVar()
 
 # midpoint of circle frame
 m_circle = [250, 200]
@@ -40,19 +41,24 @@ def dec_lvl():
     global level
     if level > 1:
         level -= 1
+    lvlStr.set(level)
 
 
 def inc_lvl():
     global level
     if level < 8:
         level += 1
+    lvlStr.set(level)
 
+level_label = Label(right_f, textvariable=lvlStr)
+lvlStr.set(level)
+level_label.pack()
 
 minus = Button(right_f, text='-', command=dec_lvl)
 plus = Button(right_f, text='+', command=inc_lvl)
 
 minus.pack(side=LEFT)
-plus.pack(side=RIGHT, padx=20)
+plus.pack(side=RIGHT, padx=10)
 
 
 def fibonacci(n):
