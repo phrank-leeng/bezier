@@ -110,7 +110,9 @@ def RC_C():
 def RC_A(start, theta, rec_depth):
     if rec_depth < limited_lvl:
         h1 = 150 / (1 + 0.75 * (limited_lvl - 1))
-        r = h1 * pow(0.75, rec_depth)
+        hn = h1 * pow(0.75, rec_depth)
+        # calculate hypotenuse
+        r = hn
         end = point_unit_circle(start, r, theta)
         color = "#%02x%02x%02x" % (135 + rec_depth * 10, 188 + rec_depth * 5, 240)
         branches.append(canvas.create_line(start[0], start[1], end[0], end[1], fill=color, width=10 - rec_depth * 2))
