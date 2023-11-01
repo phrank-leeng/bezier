@@ -86,8 +86,10 @@ def on_click(event):
 def on_drag(event):
     if drag_point is not None:
         x, y = get_center(canvas.coords(drag_point))
+        global lines
         for l in lines:
             canvas.delete(l)
+        lines = []
         canvas.move(drag_point, event.x - x, event.y - y)
         store_bezier_in_array()
         draw_bezier()
