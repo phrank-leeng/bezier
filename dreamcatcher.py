@@ -4,7 +4,7 @@ from tkinter import *
 
 # empty window
 root = tk.Tk()
-root.title("Bezier Curve")
+root.title("DreamCatcher")
 w = 800  # width for the Tk root
 h = 700  # height for the Tk root
 
