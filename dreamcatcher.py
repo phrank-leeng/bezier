@@ -64,8 +64,9 @@ def refresh():
         canvas.delete(b)
     branches = []
     RC_C()
-    if level > 5:
-        RC_B_1()
+    RC_B_1()
+    RC_B_2()
+    RC_B_3()
 
 
 level_label = Label(right_f, textvariable=lvlStr)
@@ -120,7 +121,20 @@ def RC_A(start, theta, rec_depth):
 
 
 def RC_B_1():
-    return
+    # create feathers
+    if level > 5:
+        1
+
+def RC_B_2():
+    # create fractal flowers recursively
+    if level > 6:
+        1
+
+
+def RC_B_3():
+    # create fractal petals recursively
+    if level > 7:
+        1
 
 
 # main method
