@@ -92,10 +92,13 @@ def calc_points_on_circle():
     angle = 360 / num_d
     r = 150
     for i in range(1, num_d):
-        theta = 90 + angle * i
-        p = [r * math.sin(theta), r * math.cos(theta)]
-        points.append(p)
+        theta = angle * i
+        points.append(point_unit_circle(start, r, theta))
     return points
+
+
+def point_unit_circle(p, r, theta):
+    return [p[0] + r * math.sin(theta), p[1] + r * math.cos(theta)]
 
 
 def RC_C():
@@ -104,7 +107,8 @@ def RC_C():
 
 
 def RC_A():
-
+    # draw branches, then transform points using circle calculation?
+    1 + 1
 
 
 # main method
