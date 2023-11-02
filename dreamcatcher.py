@@ -20,12 +20,13 @@ y = (hs / 2) - (h / 2) - 20
 # and where it is placed
 root.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
+# divide window into two parts, one for the dream catcher and the other for the buttons
 left_f = Frame(root, width=550, height=700)
 left_f.pack(side='left')
 right_f = Frame(root, width=250, height=700)
 right_f.pack(side='right')
 
-level = 6
+level = 1
 limited_lvl = level
 lvlStr = StringVar()
 
