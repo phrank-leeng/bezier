@@ -44,6 +44,7 @@ length_vane = 40
 D1 = 14
 W1 = 3
 
+
 def dec_lvl():
     global level
     if level > 1:
@@ -106,7 +107,7 @@ def get_feather_color():
 
 
 def get_flower_color():
-    return get_color(247,202,201)
+    return get_color(247, 202, 201)
 
 
 def draw_line(p1, p2, color, w):
@@ -219,10 +220,9 @@ def draw_petal(p, rec_depth):
         D2 = D1 * 0.5
         r = D2 / 2
         W2 = W1 - 2
-        m_petal = point_unit_circle(p, r, 60 * rec_depth)
+        m_petal = point_unit_circle(p, D2, 60 * rec_depth)
         draw_circle(m_petal, r, get_flower_color(), W2)
         draw_petal(p, rec_depth + 1)
-
 
 
 # main method
