@@ -98,28 +98,34 @@ def RC_C():
         # draw the outer circle
         canvas.create_oval(100, 50, 400, 350, outline='white', width=3)
 
+    # red horizontal line down the middle for debugging purposes
+    # canvas.create_line(250, 50, 250, 350, fill='red')
+
     # calculate the angle between dendrites
     angle = 360 / num_dendrites()
     # loop to make dendrites spread
     theta = 0
     for i in range(0, num_dendrites()):
         theta += angle
-        RC_A(point_unit_circle(m_circle, 150, theta), theta + 180, 0)
+        RC_A(point_unit_circle(m_circle, 150, theta), theta + 180, 0, theta + 180)
 
 
-def RC_A(start, theta, rec_depth):
-    if rec_depth < limited_lvl:
-        h1 = 150 / (1 + 0.75 * (limited_lvl - 1))
-        hn = h1 * pow(0.75, rec_depth)
-        # calculate hypotenuse
-        r = hn
-        end = point_unit_circle(start, r, theta)
-        color = "#%02x%02x%02x" % (135 + rec_depth * 10, 188 + rec_depth * 5, 240)
-        branches.append(canvas.create_line(start[0], start[1], end[0], end[1], fill=color, width=10 - rec_depth * 2))
-        # left branch
-        RC_A(end, theta - 30, rec_depth + 1)
-        # right branch
-        RC_A(end, theta + 30, rec_depth + 1)
+def RC_A(start, theta, rec_depth, theta_0):
+    if theta + 30 < theta_0 + 90 or theta - 30 > theta_0 - 90:
+        if rec_depth < limited_lvl:
+            factor = 0
+            for i in range(0, limited_lvl):
+                factor += pow(0.75, i)
+            h_n = 150 / factor * pow(0.75, rec_depth)
+            # if rec_depth is uneven the radius changes to the hypotenuse instead of the opposite
+            r = h_n if rec_depth % 2 == 0 else h_n / math.sin(math.radians(180 - 90 - 30))
+            end = point_unit_circle(start, r, theta)
+            color = "#%02x%02x%02x" % (135 + rec_depth * 10, 188 + rec_depth * 5, 240)
+            branches.append(canvas.create_line(start[0], start[1], end[0], end[1], fill=color, width=10 - rec_depth * 2))
+            # left branch
+            RC_A(end, theta - 30, rec_depth + 1, theta_0)
+            # right branch
+            RC_A(end, theta + 30, rec_depth + 1, theta_0)
 
 
 def RC_B_1():
