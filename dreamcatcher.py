@@ -113,10 +113,10 @@ def RC_C():
 def RC_A(start, theta, rec_depth, theta_0):
     if theta + 30 < theta_0 + 90 or theta - 30 > theta_0 - 90:
         if rec_depth < limited_lvl:
-            factor = 0
+            h1_factor = 0
             for i in range(0, limited_lvl):
-                factor += pow(0.75, i)
-            h_n = 150 / factor * pow(0.75, rec_depth)
+                h1_factor += pow(0.75, i)
+            h_n = 150 / h1_factor * pow(0.75, rec_depth)
             # if rec_depth is uneven the radius changes to the hypotenuse instead of the opposite
             r = h_n if rec_depth % 2 == 0 else h_n / math.sin(math.radians(180 - 90 - 30))
             end = point_unit_circle(start, r, theta)
