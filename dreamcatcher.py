@@ -25,7 +25,7 @@ left_f.pack(side='left')
 right_f = Frame(root, width=250, height=700)
 right_f.pack(side='right')
 
-level = 1
+level = 6
 limited_lvl = level
 lvlStr = StringVar()
 
@@ -38,8 +38,11 @@ canvas = tk.Canvas(left_f, width=550, height=700, bg='gray55')
 canvas.place(x=0, y=0)
 canvas.pack()
 
-branches = []
+dynamic_elems = []
 
+length_vane = 40
+D1 = 14
+W1 = 3
 
 def dec_lvl():
     global level
@@ -59,10 +62,10 @@ def refresh():
     global limited_lvl
     limited_lvl = level if level < 7 else 6
     lvlStr.set(level)
-    global branches
-    for b in branches:
-        canvas.delete(b)
-    branches = []
+    global dynamic_elems
+    for e in dynamic_elems:
+        canvas.delete(e)
+    dynamic_elems = []
     RC_C()
     RC_B_1()
     RC_B_2()
@@ -90,7 +93,24 @@ def num_dendrites():
 
 
 def point_unit_circle(p, r, theta):
-    return [p[0] + r * math.cos(math.radians(theta)), p[1] + r * math.sin(math.radians(theta))]
+    # negate sin because y coordinates are reversed in tkinter
+    return [p[0] + r * math.cos(math.radians(theta)), p[1] + r * -math.sin(math.radians(theta))]
+
+
+def get_color(r, g, b):
+    return "#%02x%02x%02x" % (r, g, b)
+
+
+def get_feather_color():
+    return get_color(145, 168, 208)
+
+
+def get_flower_color():
+    return get_color(247,202,201)
+
+
+def draw_line(p1, p2, color, w):
+    return canvas.create_line(p1[0], p1[1], p2[0], p2[1], fill=color, width=w)
 
 
 def RC_C():
@@ -120,8 +140,8 @@ def RC_A(start, theta, rec_depth, theta_0):
             # if rec_depth is uneven the radius changes to the hypotenuse instead of the opposite
             r = h_n if rec_depth % 2 == 0 else h_n / math.sin(math.radians(180 - 90 - 30))
             end = point_unit_circle(start, r, theta)
-            color = "#%02x%02x%02x" % (135 + rec_depth * 10, 188 + rec_depth * 5, 240)
-            branches.append(canvas.create_line(start[0], start[1], end[0], end[1], fill=color, width=10 - rec_depth * 2))
+            color = get_color(135 + rec_depth * 10, 188 + rec_depth * 5, 240)
+            dynamic_elems.append(draw_line(start, end, color, 10 - rec_depth * 2))
             # left branch
             RC_A(end, theta - 30, rec_depth + 1, theta_0)
             # right branch
@@ -131,21 +151,82 @@ def RC_A(start, theta, rec_depth, theta_0):
 def RC_B_1():
     # create feathers
     if level > 5:
-        1
+        draw_shafts()
+
+
+def draw_shafts():
+    for i in range(0, 3):
+        p = point_unit_circle(m_circle, 150, 225 + i * 45)
+        dynamic_elems.append(canvas.create_line(p[0], p[1], p[0], p[1] + 225, fill=get_feather_color(), width=5))
+        draw_vanes([p[0], p[1] + 67.5], 0)
+
+
+def draw_vanes(start, rec_depth):
+    # draw 8 vanes
+    if rec_depth < 8:
+        p_right = point_unit_circle(start, length_vane, 30)
+        p_left = point_unit_circle(start, length_vane, 150)
+        width = 5
+        dynamic_elems.append(draw_line(start, p_right, get_feather_color(), width))
+        dynamic_elems.append(draw_line(start, p_left, get_feather_color(), width))
+        draw_vanes([start[0], start[1] + 157.5 / 7], rec_depth + 1)
+
 
 def RC_B_2():
     # create fractal flowers recursively
     if level > 6:
-        1
+        for i in range(0, 3):
+            p = point_unit_circle(m_circle, 150, 225 + i * 45)
+            p = [p[0], p[1] + 67.5]
+            draw_flowers(p, 0)
+
+
+def draw_flowers(start, rec_depth):
+    if rec_depth < 8:
+        m_flower = length_vane * 2 / 3
+        p_right = point_unit_circle(start, m_flower, 30)
+        dynamic_elems.append(draw_circle(p_right, D1 / 2, get_flower_color(), W1))
+        p_left = point_unit_circle(start, m_flower, 150)
+        dynamic_elems.append(draw_circle(p_left, D1 / 2, get_flower_color(), W1))
+        draw_flowers([start[0], start[1] + 157.5 / 7], rec_depth + 1)
+
+
+def draw_circle(p, r, color, width):
+    return canvas.create_oval(p[0] - r, p[1] - r, p[0] + r, p[1] + r, outline=color, width=width)
 
 
 def RC_B_3():
     # create fractal petals recursively
     if level > 7:
-        1
+        for i in range(0, 3):
+            p = point_unit_circle(m_circle, 150, 225 + i * 45)
+            p = [p[0], p[1] + 67.5]
+            draw_petals(p, 0)
+
+
+def draw_petals(start, rec_depth):
+    if rec_depth < 8:
+        m_flower = length_vane * 2 / 3
+        p_right = point_unit_circle(start, m_flower, 30)
+        draw_petal(p_right, 0)
+        p_left = point_unit_circle(start, m_flower, 150)
+        draw_petal(p_left, 0)
+        draw_petals([start[0], start[1] + 157.5 / 7], rec_depth + 1)
+
+
+def draw_petal(p, rec_depth):
+    if rec_depth < 6:
+        D2 = D1 * 0.5
+        r = D2 / 2
+        W2 = W1 - 2
+        m_petal = point_unit_circle(p, r, 60 * rec_depth)
+        draw_circle(m_petal, r, get_flower_color(), W2)
+        draw_petal(p, rec_depth + 1)
+
 
 
 # main method
 if __name__ == '__main__':
     RC_C()
+    refresh()
     root.mainloop()
