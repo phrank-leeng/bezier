@@ -216,16 +216,16 @@ def draw_flowers(start, rec_depth):
         m_flower = length_vane * 2 / 3
         # find exact mid-point
         p_right = point_on_circle(start, m_flower, 30)
-        dynamic_elems.append(draw_circle(p_right, D1 / 2, get_flower_color(), W1))
+        draw_circle(p_right, D1 / 2, get_flower_color(), W1)
         # do the same for left flower
         p_left = point_on_circle(start, m_flower, 150)
-        dynamic_elems.append(draw_circle(p_left, D1 / 2, get_flower_color(), W1))
+        draw_circle(p_left, D1 / 2, get_flower_color(), W1)
         # next vane
         draw_flowers([start[0], start[1] + 157.5 / 7], rec_depth + 1)
 
 
 def draw_circle(p, r, color, width):
-    return canvas.create_oval(p[0] - r, p[1] - r, p[0] + r, p[1] + r, outline=color, width=width)
+    dynamic_elems.append(canvas.create_oval(p[0] - r, p[1] - r, p[0] + r, p[1] + r, outline=color, width=width))
 
 
 # creates 6 fractal petals recursively
