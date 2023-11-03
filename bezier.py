@@ -1,44 +1,37 @@
-from graphics import *
+import tkinter as tk
 import numpy as np
-import time
 
 # empty window
-win = GraphWin("Bezier Curve", 500, 700)
+root = tk.Tk()
+root.title("Bezier Curve")
 
-# empty global array to store starting points
+# empty canvas
+canvas = tk.Canvas(root, width=500, height=700)
+canvas.pack()
+
+# empty global array to store starting points P1, P2, P3, P4
 start = []
 
-# generate t values
-ts = [t / 50 for t in range(101)]
+# generate t values from 0 to 1 in 0.01 increments
+ts = [t / 100 for t in range(101)]
 
+# empty array to hold id for lines
 lines = []
 
 
-# this function calculates the points on the Bézier curve recursively for any parameter t and returns them
-def calc_point(p1, p2, p3, p4, t):
-    # transform vectors to numpy arrays for easier scalar operations
-    np1 = np.array(p1)
-    np2 = np.array(p2)
-    np3 = np.array(p3)
-    np4 = np.array(p4)
-    # t is equivalent to the distance traveled on the Bézier curve from control point P1 to P4
-    if t < 0.01:
-        # if t is smaller than this threshold we can just return P1 as changes are likely not noticeable for the
-        # given screen resolutions
-        return p1
-    else:
-        # calculate mid points
-        p12 = (np1 + np2) / 2
-        p23 = (np2 + np3) / 2
-        p34 = (np3 + np4) / 2
+# calculates midpoints on the Bézier curve recursively for any parameter t and returns the final midpoint q
+def calc_point(p, t):
+    if len(p) == 1:
+        return p[0]
 
-        p123 = (p12 + p23) / 2
-        p234 = (p23 + p34) / 2
+    new_points = []
 
-        q = (p123 + p234) / 2
+    # transform vectors to numpy arrays for easier scalar operation
+    npp = np.array(p)
+    for i in range(0, len(npp) - 1):
+        new_points.append(((1 - t) * npp[i] + t * npp[i + 1]).tolist())
 
-        # calculate point on the Bézier curve according to the formula in the lecture and transform back to python array
-        return ((1 - t) ** 3 * np1 + 3 * t * (1 - t) ** 2 * p12 + 3 * t ** 2 * (1 - t) * p123 + t ** 3 * q).tolist()
+    return calc_point(new_points, t)
 
 
 # calculates and returns an array with points on the Bézier curve
@@ -48,99 +41,87 @@ def bezier(p1, p2, p3, p4, ts):
     # iterate through t values and calculate the point on the curve
     for t in ts:
         # add the calculated points to the empty array
-        points.append(calc_point(p1, p2, p3, p4, t))
+        points.append(calc_point([p1, p2, p3, p4], t))
     return points
 
 
-def rect_clicked(rects, x, y):
-    for r in rects:
-        if r.getP1().x-20 <= x <= r.getP2().x-20:
-            if r.getP2().y-20 <= y <= r.getP1().y+20:
-                return r
-    return None
-
-
-# helper method to extract starting points from rectangles
+# helper method to extract coordinates from rectangles
 def get_p_from_rect():
     # explicitly assign points for easy access
-    p1 = (start[0].getCenter().x, start[0].getCenter().y)
-    p2 = (start[1].getCenter().x, start[1].getCenter().y)
-    p3 = (start[2].getCenter().x, start[2].getCenter().y)
-    p4 = (start[3].getCenter().x, start[3].getCenter().y)
-    return p1, p2, p3, p4
+    p1 = canvas.coords(start[0])
+    p2 = canvas.coords(start[1])
+    p3 = canvas.coords(start[2])
+    p4 = canvas.coords(start[3])
+    return [get_center(p1), get_center(p2), get_center(p3), get_center(p4)]
 
 
+# helper method, returns center of the rectangles
+def get_center(p):
+    return [(p[2] + p[0]) / 2, (p[3] + p[1]) / 2]
+
+
+# store multimediasystems points in the global points array
 def store_bezier_in_array():
     p1, p2, p3, p4 = get_p_from_rect()
     global points
     points = bezier(p1, p2, p3, p4, ts)
 
-def undraw_bezier():
-    global lines
-    for l in lines:
-        l.undraw()
-    lines = []
-
 
 def draw_bezier():
     global lines
-    undraw_bezier()
     # iterate through calculated points and draw a line between them
     for x in range(len(points) - 1):
-        l = Line(Point(points[x][0], points[x][1]), Point(points[x + 1][0], points[x + 1][1]))
+        l = canvas.create_line(points[x][0], points[x][1], points[x + 1][0], points[x + 1][1], fill="black")
         lines.append(l)
-        l.draw(win)
 
 
-def motion(event):
-    if len(start) == 4:
-        x, y = event.x, event.y
-        clicked_rect = rect_clicked(start, x, y)
-        clicked_rect.move(abs(x - clicked_rect.getCenter().x), abs(y - clicked_rect.getCenter().y))
+# select the closest rectangle on click
+def on_click(event):
+    rect = get_closest_rect(event.x, event.y)
+    global drag_point
+    drag_point = rect
+
+
+# when a rectangle is dragged, recalculate and redraw Bézier curve
+def on_drag(event):
+    if drag_point is not None:
+        x, y = get_center(canvas.coords(drag_point))
+        global lines
+        for l in lines:
+            canvas.delete(l)
+        lines = []
+        canvas.move(drag_point, event.x - x, event.y - y)
         store_bezier_in_array()
         draw_bezier()
-        if clicked_rect is not None:
-            #clicked_rect.move(abs(x - clicked_rect.getCenter().x), abs(y - clicked_rect.getCenter().y))
+
+
+# needed for establishing clicked rectangle
+def get_closest_rect(x, y):
+    for r in start:
+        center = get_center(canvas.coords(r))
+        if abs(x - center[0]) < 8 and abs(y - center[1]) < 8:
+            return r
+
+
+# register the first 4 clicks to generate rectangles, then bind the click and motion event to dragging rectangles
+def place_points(event):
+    global start
+    if len(start) <= 4:
+        rect = canvas.create_rectangle(event.x - 4, event.y - 4, event.x + 4, event.y + 4, fill="black")
+        start.append(rect)
+        # once 4 clicks have been registered, rebind mouse clicks to start dragging operation
+        if len(start) == 4:
+            canvas.unbind("<Button-1>")
+            for p in start:
+                canvas.tag_bind(p, "<Button-1>", on_click)
+                canvas.tag_bind(p, "<B1-Motion>", on_drag)
+            # at 4 clicks calculate and draw the Bézier curve
             store_bezier_in_array()
             draw_bezier()
 
 
+# main method
 if __name__ == '__main__':
-    # Override size and position of the GraphWin.
-    w, h = 500, 700  # Width and height.
-    x, y = 20, 20  # Screen position.
-    win.master.geometry('%dx%d+%d+%d' % (w, h, x, y))
-    win.bind('<B1-Motion>', motion)
+    canvas.bind("<Button-1>", place_points)
 
-    # register first 4 clicks to establish the starting points and add them to array
-    for x in range(0, 4):
-        p = win.getMouse()
-        # add offset to the rectangle, so it is centered around the clicked position
-        p.x = p.x - 3
-        p.y = p.y + 3
-        rect = Rectangle(p, Point(p.x + 6, p.y - 6))
-        rect.setFill("white")
-        rect.draw(win)
-        start.append(rect)
-
-    # call bezier function and store them
-    store_bezier_in_array()
-    draw_bezier()
-
-    # last_frame_time = 0
-    # while True:
-    #     current_time = time.time()
-    #     dt = current_time - last_frame_time
-    #     last_frame_time = current_time
-    #
-    #     sleepTime = 1. / 60 - (current_time - last_frame_time)
-    #     if sleepTime > 0:
-    #         time.sleep(sleepTime)
-    #
-    #     points = bezier(p1, p2, p3, p4, ts)
-
-    while True:
-        win.getMouse()
-
-    # win.getMouse()
-    # win.close()
+    root.mainloop()
